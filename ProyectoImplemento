@@ -1,0 +1,144 @@
+using System;
+using System.Collections.Generic;
+
+class Cliente
+{
+    public int Cedula { get; set; }
+    public int Estrato { get; set; }
+    public int MetaAhorro { get; set; }
+    public int ConsumoActual { get; set; }
+
+    public double CalcularValorPagar()
+    {
+        double valorParcial = ConsumoActual * 500;
+        double valorIncentivo = (MetaAhorro - ConsumoActual) * 500;
+        double valorPorPagar = valorParcial - valorIncentivo;
+        return valorPorPagar;
+    }
+
+    public double CalcularDescuento()
+    {
+        double valorIncentivo = (MetaAhorro - ConsumoActual) * 500;
+        return valorIncentivo;
+    }
+
+    public double CalcularPorcentajeAhorro()
+    {
+        double descuento = CalcularDescuento();
+        double porcentajeAhorro = (descuento / (ConsumoActual * 500)) * 100;
+        return porcentajeAhorro;
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        List<Cliente> clientes = new List<Cliente>();
+
+        Console.Write("Ingrese la cantidad de clientes: ");
+        int cantidadClientes = Convert.ToInt32(Console.ReadLine());
+
+        for (int i = 0; i < cantidadClientes; i++)
+        {
+            Console.Write($"Ingrese la cédula del cliente {i + 1}: ");
+            int cedula = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write($"Ingrese el estrato del cliente {i + 1}: ");
+            int estrato = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write($"Ingrese la meta de ahorro para el cliente {i + 1}: ");
+            int metaAhorro = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write($"Ingrese el consumo actual del cliente {i + 1}: ");
+            int consumoActual = Convert.ToInt32(Console.ReadLine());
+
+            Cliente cliente = new Cliente
+            {
+                Cedula = cedula,
+                Estrato = estrato,
+                MetaAhorro = metaAhorro,
+                ConsumoActual = consumoActual
+            };
+
+            clientes.Add(cliente);
+        }
+
+        while (true)
+        {
+            Console.WriteLine("\nMenú de opciones:");
+            Console.WriteLine("1. Mostrar valores a pagar por cliente");
+            Console.WriteLine("2. Mostrar valor total otorgado como descuentos");
+            Console.WriteLine("3. Mostrar promedio del consumo actual de energía");
+            Console.WriteLine("4. Mostrar porcentajes de ahorro por estrato");
+            Console.WriteLine("5. Mostrar clientes con cobro adicional");
+            Console.WriteLine("6. Salir");
+            Console.Write("Seleccione una opción: ");
+
+            int opcion = Convert.ToInt32(Console.ReadLine());
+
+            switch (opcion)
+            {
+                case 1:
+                    Console.WriteLine("\nValores a pagar por cliente:");
+                    foreach (Cliente cliente in clientes)
+                    {
+                        double valorAPagar = cliente.CalcularValorPagar();
+                        Console.WriteLine($"Cliente con cédula {cliente.Cedula}: ${valorAPagar}");
+                    }
+                    break;
+                case 2:
+                    double totalDescuentos = 0;
+                    foreach (Cliente cliente in clientes)
+                    {
+                        totalDescuentos += cliente.CalcularDescuento();
+                    }
+                    Console.WriteLine($"\nEl valor total otorgado como descuentos es: ${totalDescuentos}");
+                    break;
+                case 3:
+                    double totalConsumo = 0;
+                    foreach (Cliente cliente in clientes)
+                    {
+                        totalConsumo += cliente.ConsumoActual;
+                    }
+                    double promedioConsumo = totalConsumo / cantidadClientes;
+                    Console.WriteLine($"\nEl promedio del consumo actual de energía es: {promedioConsumo}");
+                    break;
+                case 4:
+                    Dictionary<int, double> porcentajesAhorroPorEstrato = new Dictionary<int, double>();
+                    foreach (Cliente cliente in clientes)
+                    {
+                        if (!porcentajesAhorroPorEstrato.ContainsKey(cliente.Estrato))
+                        {
+                            porcentajesAhorroPorEstrato[cliente.Estrato] = 0;
+                        }
+                        porcentajesAhorroPorEstrato[cliente.Estrato] += cliente.CalcularPorcentajeAhorro();
+                    }
+                    Console.WriteLine("\nPorcentajes de ahorro por estrato:");
+                    foreach (var kvp in porcentajesAhorroPorEstrato)
+                    {
+                        double promedioPorcentaje = kvp.Value / cantidadClientes;
+                        Console.WriteLine($"Estrato {kvp.Key}: {promedioPorcentaje}%");
+                    }
+                    break;
+                case 5:
+                    int clientesConCobroAdicional = 0;
+                    foreach (Cliente cliente in clientes)
+                    {
+                        if (cliente.ConsumoActual > cliente.MetaAhorro)
+                        {
+                            clientesConCobroAdicional++;
+                        }
+                    }
+                    Console.WriteLine($"\nClientes con cobro adicional: {clientesConCobroAdicional}");
+                    break;
+                case 6:
+                    Console.WriteLine("Gravias Por usar");
+                    return;
+                default:
+                    Console.WriteLine("Opción inválida. Seleccione una opción válida.");
+                    break;
+            }
+        }
+    }
+}
